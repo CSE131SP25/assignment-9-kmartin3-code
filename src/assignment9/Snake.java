@@ -11,7 +11,14 @@ public class Snake {
 	private double deltaY;
 	
 	public Snake() {
-		//FIXME - set up the segments instance variable
+		// Step 1: Initialize the LinkedList
+		segments = new LinkedList<BodySegment>();
+		// Add one BodySegment to the snake at a starting position (e.g., center of canvas)
+		double startX = 0.5;
+		double startY = 0.5;
+		BodySegment head = new BodySegment(startX, startY, SEGMENT_SIZE);
+		segments.add(head);
+				
 		deltaX = 0;
 		deltaY = 0;
 	}
@@ -37,24 +44,54 @@ public class Snake {
 	 * based on the current direction of travel
 	 */
 	public void move() {
-		//FIXME
+		 // Step 3: Get the head and calculate the new position
+	    BodySegment head = segments.getFirst();
+	    double newX = head.getX() + deltaX;
+	    double newY = head.getY() + deltaY;
+
+	    // Move segments from back to front
+	    for (int i = segments.size() - 1; i > 0; i--) {
+	        BodySegment prev = segments.get(i - 1);
+	        segments.get(i).setPosition(prev.getX(), prev.getY());
+	    }
+
+	    // Move head last
+	    head.setPosition(newX, newY);
 	}
 	
 	/**
 	 * Draws the snake by drawing each segment
 	 */
 	public void draw() {
-		//FIXME
+		// Step 2: Draw all body segments
+		for (BodySegment segment : segments) {
+		segment.draw();
+		}
 	}
-	
+	//This method adds a new segment at the end of the snake, behind the tail
+	public void grow() {
+	    BodySegment tail = segments.getLast();
+
+	    // Add new segment at tail's position with a fixed color (e.g., Color.GREEN)
+	    BodySegment newSegment = new BodySegment(tail.getX(), tail.getY(), tail.getSize());
+	    segments.addLast(newSegment);
+	}
 	/**
 	 * The snake attempts to eat the given food, growing if it does so successfully
 	 * @param f the food to be eaten
 	 * @return true if the snake successfully ate the food
 	 */
-	public boolean eatFood(Food f) {
-		//FIXME
-		return false;
+	public boolean eatFood(Food food) {
+		  BodySegment head = segments.getFirst();
+		    double dx = head.getX() - food.getX();
+		    double dy = head.getY() - food.getY();
+		    double distance = Math.sqrt(dx * dx + dy * dy);
+
+		    if (distance < 0.04) { // Collision threshold (adjust as needed)
+		        grow(); // Add new segment
+		        return true;
+		    }
+		    return false;
 	}
 	
 	/**
@@ -62,7 +99,10 @@ public class Snake {
 	 * @return whether or not the head is in the bounds of the window
 	 */
 	public boolean isInbounds() {
-		//FIXME
-		return true;
+		 BodySegment head = segments.getFirst();
+		    double x = head.getX();
+		    double y = head.getY();
+
+		    return (x >= 0 && x <= 1 && y >= 0 && y <= 1);
 	}
 }
